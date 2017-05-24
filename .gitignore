@@ -1,0 +1,11 @@
+#node modules
+node_modules
+
+# tilde files
+*~
+
+# bin
+bin
+
+#Debug log
+npm-debug.log

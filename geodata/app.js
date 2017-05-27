@@ -1,3 +1,4 @@
+
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
@@ -8,6 +9,7 @@ var mongoose = require('mongoose');
 
 var index = require('./routes/index');
 var users = require('./routes/users');
+var fences = require('./routes/fences');
 
 var app = express();
 
@@ -28,6 +30,7 @@ var db = mongoose.connection;
 
 app.use('/', index);
 app.use('/users', users);
+app.use('/api/fences', fences);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

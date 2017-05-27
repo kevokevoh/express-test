@@ -45,16 +45,13 @@ module.exports.fenceCordinate = (lat, long, radius) => {
     arrayCord=[];
     
     anchorPoint = {latitude:lat,longitude:long};
-    console.log(availCords);
     // Check if anchor point in user provided radius expensive for a huge cords though
     arrayCord=[];
     availCords.forEach((cordinate)=>{
         var status =  anchorInRadOfCord(anchorPoint, cordinate, radius);
-        console.log(status);
         if (status == true){
             arrayCord.push(cordinate);
         }
     });
-    console.log(arrayCord);
     return arrayCord;
 };

@@ -1,13 +1,13 @@
 const mongoose = require('mongoose');
 
 const fenceSchema = mongoose.Schema({
-	lat:{
+	latitude:{
 		type: String,
-		required: false
+		required: true
 	},
-    long:{
+    longitude:{
         type: Number,
-        required: false
+        required: true
     },
     arrayCord:{
         type:Array,
@@ -15,11 +15,11 @@ const fenceSchema = mongoose.Schema({
     },
     radius:{
         type: Number,
-        required:false
+        required:true
     }
 });
 
-const Fence = module.exports = mongoose.model('Fence', fenceSchema);
+const Fence = module.exports = mongoose.model('geodata', fenceSchema);
 
 // Get Fences
 module.exports.getFences = (callback, limit) => {
@@ -40,8 +40,8 @@ module.exports.addFence = (fence, callback) => {
 module.exports.updateFence = (id, fence, options, callback) => {
 	var query = {_id: id};
 	var update = {
-		lat: fence.lat,
-        long: fence.long,
+		lat: fence.latitude,
+        long: fence.longitude,
         arrayCord: fence.arrayCord,
         radius: fence.radius
 	};

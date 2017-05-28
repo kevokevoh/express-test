@@ -5,7 +5,9 @@ module.exports.filterArrayOfObjectsById = (array, value) => {
 };
 
 module.exports.error_messages = [
-    {id:0,error_msg:'No latitude,longitude and radius errors'},
+    {id:0,error_msg:'Everything Good.'},
     {id:1,error_msg:'Kindly enter a valid latitude,longitude.'},
     {id:2,error_msg:'Could not get cordinates around this point.'},
-    {id:3,error_msg:'Kindly ensure that you send a valid radius.'}];
+    {id:3,error_msg:'Kindly ensure that you send a valid radius.'},
+	{id:4,error_msg:'Kindly enter a valid length or width.'}];
+

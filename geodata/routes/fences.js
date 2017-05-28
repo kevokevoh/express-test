@@ -6,8 +6,10 @@ Functions = require('./../utils/functions');
 Globals = require('./../utils/globals');
 
 /* GET all available fences. */
-router.get('/', function(req, res, next) {
-    Fence.getFences((err, fences) => {
+router.get('/', function(req, res) {
+    // Only get first 20 entries
+    limit = 20;
+    Fence.getFences(limit, (err, fences) => {
 		if(err){
 			throw err;
 		}
@@ -15,7 +17,8 @@ router.get('/', function(req, res, next) {
     });
 });
 
-router.get('/:_id', function(req, res, next) {
+// GET single entry
+router.get('/:_id', function(req, res) {
     Fence.getFenceById(req.params._id, (err, fence) => {
 		if(err){
 			throw err;
@@ -24,10 +27,14 @@ router.get('/:_id', function(req, res, next) {
     });
 });
 
-router.post('/', function(req, res, next) {
+
+// POST to get Geofenced co-ordinates
+router.post('/', function(req, res) {
     var fence = req.body;
     // validate latitude and longitude
-    validationCode = Functions.validateCordinates(fence.latitude, fence.longitude);
+    // NOTE: Mongo indexes location as [longitude, longitude]
+    // PAYLOAD should be in that format
+    validationCode = Functions.validateCordinates(fence.location[0], fence.location[1]);
     if(validationCode !=0){
         res.statusMessage=Globals.filterArrayOfObjectsById(
             Globals.error_messages, validationCode).error_msg;
@@ -42,50 +49,42 @@ router.post('/', function(req, res, next) {
         res.status(400);
         return res.end();
     }
-    
-	Fence.addFence(fence, (err, fence) => {
+    // Since we expect metres we convert to Kms
+    var radiusInKms = fence.radius/1000;
+	Fence.getCircle(fence.location[0],fence.location[1], radiusInKms, (err, fence) => {
 		if(err){
 			throw err;
 		}
 		res.json(fence);
-        next();
     });
-
-    
-    
 });
 
-router.put('/:_id', function(req, res, next) {
-    var id = req.params._id;
-	var fence = req.body;
+// POST to get Post around coordinate
+router.post('/box', function(req, res) {
+    var fence = req.body;
     // validate latitude and longitude
-    validationCode = Functions.validateCordinates(fence.latitude, fence.longitude);
+    // NOTE: Mongo indexes location as [longitude, longitude]
+    // PAYLOAD should be in that format
+    validationCode = Functions.validateCordinates(fence.location[0], fence.location[1]);
     if(validationCode !=0){
         res.statusMessage=Globals.filterArrayOfObjectsById(
             Globals.error_messages, validationCode).error_msg;
         res.status(400);
         return res.end();
     };
-    // validate radius
-    validateRadiusCode = Functions.validateRadius(fence.radius);
-    if(validateRadiusCode !=0){
+
+    validatelenWidthCode = Functions.validateLenWidth(fence.length, fence.width);
+    if(validatelenWidthCode !=0){
         res.statusMessage=Globals.filterArrayOfObjectsById(
-            Globals.error_messages, validateRadiusCode).error_msg;
+            Globals.error_messages, validatelenWidthCode).error_msg;
         res.status(400);
         return res.end();
-    };
+    }
     
-    // Get subset from declared cordinates
-    fence.arrayCord=Functions.fenceCordinate(fence.latitude, fence.longitude,
-                                             fence.radius);
-    if(fence.arrayCord.length==0){
-        res.statusMessage = Globals.filterArrayOfObjectsById(
-            Globals.error_messages, 2).error_msg;
-        res.status(204);
-        return res.end();
-    };
-
-	Fence.updateFence(id, fence, {}, (err, fence) => {
+    // We need to calculate what to send to box plot
+    var calculatedCordinates = Functions.calculateBoxCordinates(
+        fence.location, fence.length, fence.width);
+	Fence.getBox(calculatedCordinates[0],calculatedCordinates[1], (err, fence) => {
 		if(err){
 			throw err;
 		}
@@ -93,7 +92,28 @@ router.put('/:_id', function(req, res, next) {
     });
 });
 
-router.delete('/:_id', function(req, res, next) {
+router.post('/polygon', function(req, res) {
+    var fence = req.body;
+    // validate latitude and longitude
+    // NOTE: Mongo indexes location as [longitude, longitude]
+    // PAYLOAD should be in that format
+    validationCode = Functions.validateCordinates(fence.location[0], fence.location[1]);
+    if(validationCode !=0){
+        res.statusMessage=Globals.filterArrayOfObjectsById(
+            Globals.error_messages, validationCode).error_msg;
+        res.status(400);
+        return res.end();
+    };
+    
+	Fence.getPolygon(fence.location[0],fence.location[1], (err, fence) => {
+		if(err){
+			throw err;
+		}
+		res.json(fence);
+    });
+});
+
+router.delete('/:_id', function(req, res) {
     var id = req.params._id;
 	Fence.removeFence(id, (err, fence) => {
 		if(err){

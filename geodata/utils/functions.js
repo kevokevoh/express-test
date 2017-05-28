@@ -1,18 +1,4 @@
-var geolib = require('geolib');
-
-// Order array cordinates by  distance from anchor point
-
-var orderCordByDistance = (anchorPoint, cordsArray) => {
-    var orderedCords = geolib.orderByDistance(anchorPoint, cordsArray);
-    return orderedCords;
-};
-
-var anchorInRadOfCord = (anchorPoint, baseCord, radius) => {
-    var pointInCircle = geolib.isPointInCircle(anchorPoint, baseCord, radius);
-    return pointInCircle;
-};
-
-module.exports.validateCordinates = (latitude,longitude) => {
+module.exports.validateCordinates = (longitude, latitude) => {
     var lat = parseFloat(latitude);
     var long = parseFloat(longitude);
     // validate longitude
@@ -36,22 +22,25 @@ module.exports.validateRadius = (radius) =>{
     return error_code;
 };
 
-module.exports.fenceCordinate = (lat, long, radius) => {
-    // Can get co-ordinates array from db,json file etc sample array below
-    availCords = [{latitude: 52.516272, longitude: 13.377722},
-                  {latitude: 51.518, longitude: 7.45425},
-                  {latitude: 51.503333, longitude: -0.119722},
-                  {latitude: 51.5175, longitude: 7.4678}];
-    arrayCord=[];
-    
-    anchorPoint = {latitude:lat,longitude:long};
-    // Check if anchor point in user provided radius expensive for a huge cords though
-    arrayCord=[];
-    availCords.forEach((cordinate)=>{
-        var status =  anchorInRadOfCord(anchorPoint, cordinate, radius);
-        if (status == true){
-            arrayCord.push(cordinate);
-        }
-    });
-    return arrayCord;
+module.exports.validateLenWidth = (length, width) =>{
+    var len = parseInt(length);
+    var wid = parseInt(width);
+    if (!isNaN(len,wid)){
+        var error_code = 0;
+    }
+    else{
+        error_code = 4;
+    }
+    return error_code;
+};
+
+module.exports.calculateBoxCordinates = (location, length, width) => {
+    // Divide length by 1000(metres to km) then by 111 to convert to lat/long and
+    // Then divide by 2 since the point is at the center of the box
+    adjlengthRad = length/222000;
+    adjwidthRad = width/222000;
+    // We subtract length from longitude for bottomLeft and viceversa for topright
+    bottomLeftCord = [location[0]-adjlengthRad, location[1]-adjwidthRad];
+    topRightCord = [location[0]+adjlengthRad, location[1]+adjwidthRad];
+    return [bottomLeftCord, topRightCord];
 };

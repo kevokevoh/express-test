@@ -1,25 +1,14 @@
 const mongoose = require('mongoose');
 
-const fenceSchema = mongoose.Schema({
-	latitude:{
-		type: String,
-		required: true
-	},
-    longitude:{
-        type: Number,
-        required: true
-    },
-    arrayCord:{
-        type:Array,
-        required:false
-    },
-    radius:{
-        type: Number,
-        required:true
+const RestaurantsSchema = mongoose.Schema({
+	name: String,
+    loc: {
+    type: [Number],  // [<longitude>, <latitude>]
+    index: '2d'      // create the geospatial index
     }
 });
 
-const Fence = module.exports = mongoose.model('geodata', fenceSchema);
+const Fence = module.exports = mongoose.model('Restaurants', RestaurantsSchema);
 
 // Get Fences
 module.exports.getFences = (callback, limit) => {

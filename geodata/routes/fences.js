@@ -59,7 +59,7 @@ router.post('/', function(req, res) {
     });
 });
 
-// POST to get Post around coordinate
+// POST to get box around coordinate
 router.post('/box', function(req, res) {
     var fence = req.body;
     // validate latitude and longitude
